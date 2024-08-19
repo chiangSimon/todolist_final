@@ -1,0 +1,306 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+<div class="main-wrapper" id="app" v-cloak>
+    <main class="main-content-wrapper">
+        <div class="container">
+            <div class="row mb-8">
+                <div class="col-md-12">
+                    <div class="d-md-flex justify-content-between align-items-center">
+                        <div>
+                            <h2>待辦事項清單</h2>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xl-12 col-12 mb-5">
+                    <div class="card h-100 card-lg">
+                        <div class="px-6 py-6 ">
+                            <div class="row justify-content-between">
+                                <div class="col-lg-4 col-md-6 col-12 mb-2 mb-lg-0">
+                                    <div class="d-flex align-items-center">
+                                        <label id="dailyTask" class="control-label flex-shrink-0 me-2" style="white-space: nowrap;">每日任務</label>
+                                        <input id="dailyTask" class="form-control" type="date" v-model="dailyTask" />
+                                    </div>
+                                </div>
+                                <div class="col-lg-4 col-md-6 col-12 mb-2 mb-lg-0">
+                                    <div class="d-flex align-items-center">
+                                        <label id="WeeklyTask" class="control-label flex-shrink-0 me-2" style="white-space: nowrap;">每週任務</label>
+                                        <input id="WeeklyTask" class="form-control" type="week" v-model="weeklyTask" />
+                                    </div>
+                                </div>
+                                <div class="col-lg-2 col-md-4 col-12">
+                                    <div>
+                                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#insertModal">
+                                            新增任務
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-centered table-hover text-nowrap table-borderless mb-0 table-with-checkbox">
+                                    <thead class="bg-light">
+                                        <tr>
+                                            <th>預計完成日</th>
+                                            <th>任務內容</th>
+                                            <th>優先級別</th>
+                                            <th>處理狀態</th>
+                                            <th></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr v-for="item in taskdata">
+                                            <td>{{formatDateString(item.expectedFinishTime)}}</td>
+                                            <td><a href="#" class="text-reset">{{item.taskContent}}</a></td>
+                                            <td>{{item.priorityLevel}}</td>
+                                            <td>{{item.taskStatus}}</td>
+                                            <td>
+                                                <button type="button" class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#updateModal" v-on:click="selectItem(item)">編輯</button>&ensp;
+                                                <button type="button" class="btn btn-danger btn-sm" v-on:click="deleteTask(item.taskId)">刪除</button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    <div class="modal fade" id="insertModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false" role="dialog" aria-labelledby="modalTitleId" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header" style="background-color: #B0E0E6;">
+                    <h5 class="modal-title" id="modalTitleId">新增任務</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="container">
+                        <div class="row">
+                            <div class="mb-3 col-lg-12 mt-5 form-group">
+                                <h4 class="mb-3 h5">任務內容</h4>
+                                <div class="mb-3">
+                                    <textarea class="form-control" v-model="taskContent" rows="3" placeholder="請輸入文字敘述"></textarea>
+                                </div>
+                            </div>
+                            <div class="mb-3 col-lg-6">
+                                <label class="form-label">優先級別</label>
+                                <select class="form-select" v-model="priorityLevel">
+                                    <option value="高">高</option>
+                                    <option value="中">中</option>
+                                    <option value="低">低</option>
+                                </select>
+                            </div>
+                            <div class="mb-3 col-lg-6">
+                                <label class="form-label">處理狀態</label>
+                                <select class="form-select" v-model="taskStatus">
+                                    <option value="待處理">待處理</option>
+                                    <option value="處理中">處理中</option>
+                                    <option value="已完成">已完成</option>
+                                </select>
+                            </div>
+                            <div class="mb-3 col-lg-12 form-group">
+                                <label class="form-label">預計完成時間</label>
+                                <input type="datetime-local" class="form-control" v-model="expectedFinishTime" placeholder="預計完成時間" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">關閉</button>
+                        <button type="button" class="btn btn-primary" data-bs-dismiss="modal" v-on:click="postdata">確定</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="updateModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false" role="dialog" aria-labelledby="modalTitleId" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header" style="background-color: #B0E0E6;">
+                    <h5 class="modal-title" id="modalTitleId">編輯任務</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="container">
+                        <div class="row">
+                            <div class="mb-3 col-lg-12 mt-5 form-group">
+                                <h4 class="mb-3 h5">任務內容</h4>
+                                <div class="mb-3">
+                                    <textarea class="form-control" v-model="selectedItem.taskContent" rows="3" placeholder="請輸入文字敘述"></textarea>
+                                </div>
+                            </div>
+                            <div class="mb-3 col-lg-6">
+                                <label class="form-label">優先級別</label>
+                                <select class="form-select" v-model="selectedItem.priorityLevel">
+                                    <option value="高">高</option>
+                                    <option value="中">中</option>
+                                    <option value="低">低</option>
+                                </select>
+                            </div>
+                            <div class="mb-3 col-lg-6">
+                                <label class="form-label">處理狀態</label>
+                                <select class="form-select" v-model="selectedItem.taskStatus">
+                                    <option value="待處理">待處理</option>
+                                    <option value="處理中">處理中</option>
+                                    <option value="已完成">已完成</option>
+                                </select>
+                            </div>
+                            <div class="mb-3 col-lg-12 form-group">
+                                <label class="form-label">預計完成時間</label>
+                                <input type="datetime-local" class="form-control" v-model="selectedItem.expectedFinishTime" placeholder="預計完成時間" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">關閉</button>
+                        <button type="button" class="btn btn-primary" data-bs-dismiss="modal" v-on:click="editTask">確定</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+<script>
+    const app = Vue.createApp({
+        data() {
+            return {
+                taskdata: [],
+                priorityLevel: "",
+                taskContent: "",
+                taskStatus: "",
+                expectedFinishTime: null,
+                selectedItem: {},
+                dailyTask: null,
+                weeklyTask: null
+            }
+        },
+        mounted() {
+            this.getdata();
+        },
+        methods: {
+            getdata() {
+                let _this = this;
+                fetch(`/api/Taskmanage/GetData`)
+                    .then(response => response.json())
+                    .then(data => {
+                        _this.taskdata = data;
+                        console.log(data);
+                    })
+                    .catch(error => console.log(error));
+            },
+            getWeekStartAndEnd(weekString) {
+                const [year, week] = weekString.split('-W').map(Number);
+                const firstDayOfYear = new Date(year, 0, 1);
+                const days = (week - 1) * 7;
+                const startOfWeek = new Date(firstDayOfYear.setDate(firstDayOfYear.getDate() - firstDayOfYear.getDay() + days));
+                const endOfWeek = new Date(startOfWeek);
+                endOfWeek.setDate(endOfWeek.getDate() + 6);
+                return {
+                    startOfWeek: startOfWeek.toISOString().split('T')[0], 
+                    endOfWeek: endOfWeek.toISOString().split('T')[0], 
+                }
+            },
+            searchByWeek() {
+                const { startOfWeek, endOfWeek } = this.getWeekStartAndEnd(this.weeklyTask);
+                console.log("Start of Week:", startOfWeek);
+                console.log("End of Week:", endOfWeek);
+                fetch(`/api/Taskmanage/GetDataByWeek?start=${startOfWeek}&end=${endOfWeek}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        this.taskdata = data;
+                    })
+                    .catch(error => console.log(error));
+            },
+            searchByDate() {
+                let _this = this;
+                console.log(_this.dailyTask)
+                if (_this.dailyTask) {
+                    fetch(`/api/Taskmanage/GetDataByDate?date=${_this.dailyTask}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            _this.taskdata = data;
+                            console.log(data);
+                        })
+                        .catch(error => console.log(error));
+                }
+                
+            },
+            formatDateString(dateString) {
+                const date = new Date(dateString);
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const day = String(date.getDate()).padStart(2, '0');
+                const hours = String(date.getHours()).padStart(2, '0');
+                const minutes = String(date.getMinutes()).padStart(2, '0');
+                return `${year}-${month}-${day} ${hours}:${minutes}`;
+            },
+            postdata() {
+                let _this = this;
+                var form = new FormData;
+                form.append('TaskContent', _this.taskContent)
+                form.append('PriorityLevel', _this.priorityLevel)
+                form.append('TaskStatus', _this.taskStatus)
+                form.append('ExpectedFinishTime', _this.expectedFinishTime)
+                console.log(Object.fromEntries(form));
+                fetch('/api/TaskManage/addTask', { method: "Post", body: form })
+                    .then(response => response.text())
+                    .then(data => {
+                        alert((data));
+                        _this.getdata()
+                    }).catch(error => console.log(error));
+
+
+            },
+            selectItem(item) {
+                let _this = this;
+                _this.selectedItem = item;
+                console.log(item);
+
+            },
+            editTask() {
+                let _this = this;
+                var form = new FormData;
+                form.append('TaskId', _this.selectedItem.taskId)
+                form.append('TaskContent', _this.selectedItem.taskContent)
+                form.append('PriorityLevel', _this.selectedItem.priorityLevel)
+                form.append('TaskStatus', _this.selectedItem.taskStatus)
+                form.append('ExpectedFinishTime', _this.selectedItem.expectedFinishTime)
+                console.log(Object.fromEntries(form));
+                fetch('/api/TaskManage/updateTask', { method: "Post", body: form })
+                    .then(response => response.text())
+                    .then(data => {
+                        alert((data));
+                        _this.getdata()
+                    }).catch(error => console.log(error));
+
+            },
+            deleteTask(id) {
+                let _this = this;
+                console.log(id);
+                fetch(`/api/TaskManage/DeleteTask/${id}`, { method: "DELETE" })
+                    .then(response => response.text())
+                    .then(data => {
+                        alert((data));
+                        _this.getdata()
+                    }).catch(error => console.log(error));
+            }
+        },
+        watch: {
+            dailyTask(newDate) {
+                this.searchByDate();  // 当 dailyTask 变化时，调用 searchByDate 方法
+            },
+            weeklyTask(newWeek) {
+                this.searchByWeek();  // 当 WeeklyTask 变化时，调用 searchByWeek 方法
+            }
+        }
+
+    }).mount('#app')
+</script>

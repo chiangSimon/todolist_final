@@ -1,0 +1,75 @@
+﻿
+
+<div class="container">
+    <div class="text-center"><img src="~/assets/images/todolistlogo.png" alt="logo" width="200px" /></div>
+    <div class="row justify-content-center align-items-center">
+        <div class="col-12 col-md-6 col-lg-4 order-lg-2 order-1">
+            <div class="mb-lg-9 mb-5">
+                <h1 class="mb-1 h2 fw-bold text-center">歡迎回來!請輸入您的帳號。</h1>
+            </div>
+            <div class="row g-3" id="loginApp">
+                <div class="col-12">
+                    <input type="email" v-model="UserEmail" class="form-control" placeholder="請輸入您的帳號" required>
+                </div>
+                <div class="col-12">
+                    <div class="password-field position-relative">
+                        <input v-bind:type="loginPwdToggleType" type="password" v-model="Password" placeholder="請輸入您的密碼" class="form-control" required>
+                        <span><i id="passwordToggler" v-bind:class="loginPwdToggleClass" @@click="loginPwdShow = !loginPwdShow"></i></span>
+                    </div>
+                </div>
+                <div class="col-12 d-grid">
+                    <button type="submit" class="btn btn-primary" @@click="login">登入</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        const LoginApp = Vue.createApp({
+            data() {
+                return {
+                    UserEmail: "",
+                    Password: "",
+                    loginPwdShow: false,
+                }
+            },
+            methods: {
+                login() {
+                    var _this = this;
+                    if (_this.UserEmail == "" || _this.Password == "") {
+                        alert("請重新確認輸入資訊");
+                    } else {
+                        var form = new FormData();
+                        form.append("UserEmail", _this.UserEmail);
+                        form.append("Password", _this.Password);
+
+                        fetch('/User/Login', { method: "post", body: form })
+                            .then(response => response.json())  
+                            .then(data => {
+                                if (data.success) {
+                                    alert(data.message);  
+                                    window.location.href = "/Home/Index";  
+                                } else {
+                                    alert(data.message);  
+                                }
+                            })
+                            .catch(error => {
+                                console.log(error);
+                            });
+                    }
+                },
+            },
+            computed: {
+                loginPwdToggleClass() {
+                    return this.loginPwdShow ? "bi bi-eye" : "bi bi-eye-slash"
+                },
+                loginPwdToggleType() {
+                    return this.loginPwdShow ? "text" : "password"
+                },
+            }
+        }).mount("#loginApp")
+    </script>
+}

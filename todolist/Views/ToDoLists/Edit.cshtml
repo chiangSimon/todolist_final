@@ -1,0 +1,49 @@
+﻿@model todolist.Models.ToDoList
+
+@{
+    ViewData["Title"] = "Edit";
+}
+
+<h1>Edit</h1>
+
+<h4>ToDoList</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Edit">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="TaskId" />
+            <div class="form-group">
+                <label asp-for="TaskContent" class="control-label"></label>
+                <input asp-for="TaskContent" class="form-control" />
+                <span asp-validation-for="TaskContent" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="PriorityLevel" class="control-label"></label>
+                <input asp-for="PriorityLevel" class="form-control" />
+                <span asp-validation-for="PriorityLevel" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="TaskStatus" class="control-label"></label>
+                <input asp-for="TaskStatus" class="form-control" />
+                <span asp-validation-for="TaskStatus" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="ExpectedFinishTime" class="control-label"></label>
+                <input asp-for="ExpectedFinishTime" class="form-control" />
+                <span asp-validation-for="ExpectedFinishTime" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Save" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

@@ -1,0 +1,114 @@
+﻿@* @section Styles {
+    <link href="~/css/loginsite.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11">
+} *@
+@{
+    ViewData["Title"] = "登入註冊";
+}
+
+<div class="container text-center" id="registerApp">
+    <template v-if="loading == true">
+        <div class="loading-overlay">
+            <div class="loading-spinner"></div>
+        </div>
+    </template>
+    <template v-else>
+        <div class="row align-items-stretch">
+            <div class="col">
+                <div class="my-lg-8 my-8">
+                    <div class="container">
+                        <div class="row justify-content-center align-items-center">
+                            <div class="col-12 col-md-6 col-lg-4 order-lg-2 order-1">
+                                <div>
+                                    <h1 class="mb-1 h2 fw-bold">註冊成為To Do List會員!</h1>
+                                </div>
+                                <div>
+                                    <div class="row g-4">
+                                        <div class="col-12">
+                                            <input type="email" v-model="UserEmail" class="form-control" id="inputEmail4" placeholder="請輸入欲註冊的Email" required="">
+                                        </div>
+                                        <div class="col-12">
+                                            <input type="text" v-model="UserName" class="form-control" id="inputEmail5" placeholder="請輸入使用者名稱" required="">
+                                        </div>
+                                        <div class="col-12">
+                                            <div class="password-field position-relative">
+                                                <input v-bind:type="registerPwdShowType" v-model="Password" id="fakePassword" placeholder="請輸入註冊密碼" class="form-control" required="">
+                                                <span><i id="passwordToggler" v-bind:class="registerPwdShowClass" @@click="registerPwdShow = !registerPwdShow"></i></span>
+                                            </div>
+                                        </div>
+                                        <div class="col-12">
+                                            <div class="password-field position-relative">
+                                                <input v-bind:type="registerConfirmPwdShowType" v-model="PasswordConfirm" id="passwordConfirmed" placeholder="再次輸入密碼" class="form-control" required="">
+                                                <span><i id="passwordToggler" v-bind:class="registerConfirmPwdShowClass" @@click="registerConfirmPwdShow = !registerConfirmPwdShow"></i></span>
+                                            </div>
+                                        </div>
+                                        <div class="col-12 d-grid">
+                                            <button id="registerSubmit" type="submit" class="btn btn-primary" @@click="register">註冊</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        const RegisterApp = Vue.createApp({
+            data() {
+                return {
+                    UserEmail: "",
+                    UserName: "",
+                    Password: "",
+                    PasswordConfirm: "",
+                    loading: false,
+                    registerPwdShow: false,
+                    registerConfirmPwdShow: false,
+                    loginPwdShow: false,
+                }
+            },
+            methods: {
+                register() {
+                    var _this = this;
+                    if (_this.Password != _this.PasswordConfirm || _this.UserEmail == "" || _this.UserName == "" || _this.Password == "") {
+                        alert("請重新確認輸入資訊")
+                    } else {
+                        // _this.loading = true;
+                        var form = new FormData();
+                        form.append("UserEmail", _this.UserEmail);
+                        form.append("Password", _this.Password);
+                        form.append("UserName", _this.UserName);
+                        console.log(Object.fromEntries(form));
+                        fetch('/User/Register', { method: "Post", body: form })
+                            .then(response => response.text())
+                            .then(data => {
+                                alert((data));
+                            }).catch(error => console.log(error));
+
+
+
+                    }
+                },
+            },
+            computed: {
+                registerPwdShowClass() {
+                    return this.registerPwdShow ? "bi bi-eye" : "bi bi-eye-slash"
+                },
+                registerPwdShowType() {
+                    return this.registerPwdShow ? "text" : "password"
+                },
+                registerConfirmPwdShowClass() {
+                    return this.registerConfirmPwdShow ? "bi bi-eye" : "bi bi-eye-slash"
+                },
+                registerConfirmPwdShowType() {
+                    return this.registerConfirmPwdShow ? "text" : "password"
+                },
+            }
+        }).mount("#registerApp")
+    </script>
+}
